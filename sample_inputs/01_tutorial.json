@@ -1,0 +1,6 @@
+{
+  "filename": "01_tutorial.json",
+  "script": "Welcome to this step-by-step programming tutorial. Today we will explore clean code architecture and automated testing. Modular design ensures your system remains reliable and easy to maintain over time.",
+  "voice": "en-IN-female",
+  "category": "tutorial"
+}

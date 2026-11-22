@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+ENV/
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+frontend/build/
+.npm
+*.log
+
+# Project Storage & Media Artifacts
+storage/
+test_outputs/
+*.sqlite
+*.sqlite3
+*.db
+*.mp4
+*.mp3
+*.wav
+*.m4a
+!sample_inputs/*.mp3
+!sample_inputs/*.wav
+!sample_inputs/*.m4a
+
+# Environment variables & secrets
+.env
+*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# MinIO / DB data
+minio_data/
+postgres_data/
+redis_data/
