@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
-from fastapi import APIRouter, HTTPException, status
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, HTTPException, Response, status
+from fastapi.responses import FileResponse, JSONResponse
+from sqlalchemy import text
 from backend.app.config.settings import settings
 from backend.app.core.logging import logger
 from backend.app.db.session import engine
@@ -23,19 +24,18 @@ async def health_check():
 
 
 @router.get("/ready", tags=["System"])
-async def readiness_check():
+async def readiness_check(response: Response):
     db_ok = False
     try:
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
             db_ok = True
     except Exception as e:
         logger.warning(f"Readiness DB probe failed: {e}")
 
     storage_ok = Path(settings.LOCAL_STORAGE_PATH).exists()
-
     is_ready = db_ok and storage_ok
-    status_code = status.HTTP_200_OK if is_ready else status.HTTP_503_SERVICE_UNAVAILABLE
+    response.status_code = status.HTTP_200_OK if is_ready else status.HTTP_503_SERVICE_UNAVAILABLE
 
     return {
         "status": "ready" if is_ready else "not_ready",

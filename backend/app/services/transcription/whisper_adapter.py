@@ -65,12 +65,37 @@ class FasterWhisperAdapter(TranscriptionAdapter):
             self._model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
         return self._model
 
+    def _decode_audio(self, audio_path: str):
+        import subprocess
+        import numpy as np
+
+        cmd = [
+            settings.FFMPEG_PATH,
+            "-nostdin",
+            "-threads",
+            "0",
+            "-i",
+            str(audio_path),
+            "-f",
+            "s16le",
+            "-ac",
+            "1",
+            "-acodec",
+            "pcm_s16le",
+            "-ar",
+            "16000",
+            "-",
+        ]
+        out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
+        return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+
     def transcribe(self, audio_path: str) -> Dict[str, Any]:
         try:
             model = self._get_model()
+            audio_data = self._decode_audio(audio_path)
 
             segments_gen, info = model.transcribe(
-                audio_path,
+                audio_data,
                 beam_size=5,
                 word_timestamps=True,
                 vad_filter=True,

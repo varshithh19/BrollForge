@@ -1,3 +1,4 @@
+import json
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -38,11 +39,19 @@ class ClipSwapper:
 
             scene = db.query(SceneModel).filter(SceneModel.job_id == job_id, SceneModel.id == scene_id).first()
             if not scene:
-                # Also allow matching by scene_index or prefix
-                scene = db.query(SceneModel).filter(
-                    SceneModel.job_id == job_id,
-                    (SceneModel.id.like(f"%{scene_id}%"))
-                ).first()
+                if str(scene_id).isdigit():
+                    scene = db.query(SceneModel).filter(SceneModel.job_id == job_id, SceneModel.scene_index == int(scene_id)).first()
+                elif str(scene_id).startswith("scene_"):
+                    try:
+                        idx = int(scene_id.split("_")[1]) - 1
+                        scene = db.query(SceneModel).filter(SceneModel.job_id == job_id, SceneModel.scene_index == idx).first()
+                    except Exception:
+                        pass
+                if not scene:
+                    scene = db.query(SceneModel).filter(
+                        SceneModel.job_id == job_id,
+                        (SceneModel.id.like(f"%{scene_id}%"))
+                    ).first()
             if not scene:
                 raise ValidationError(f"Scene '{scene_id}' not found in job {job_id}")
 
@@ -145,9 +154,54 @@ class ClipSwapper:
                 target_scene.aspect_ratio_outputs = updated_aspect_outputs
                 target_scene.selection_reason = f"Replaced via clip swapping API. New visual hint: '{new_visual_hint}'"
 
+            # Update timeline.json and manifest.json
+            tl_updated = None
+            timeline_file = work_dir / "timeline.json"
+            if timeline_file.exists():
+                with open(timeline_file, "r", encoding="utf-8") as f:
+                    tl_updated = json.load(f)
+                for sc in tl_updated.get("scenes", []):
+                    if sc.get("scene_id") == scene.id or sc.get("scene_index") == scene.scene_index:
+                        sc["selected_clip"] = raw_clip_filename
+                        sc["provider"] = new_cand.provider
+                        sc["provider_asset_id"] = new_cand.provider_asset_id
+                        sc["source_url"] = new_cand.source_url
+                        sc["licence_name"] = new_cand.licence_name
+                        sc["licence_url"] = new_cand.licence_url
+                        sc["attribution"] = new_cand.attribution
+                        sc["creator"] = new_cand.creator
+                        sc["aspect_ratio_outputs"] = updated_aspect_outputs
+                        sc["selection_reason"] = f"Replaced via clip swapping API. Visual hint: '{new_visual_hint}'"
+                with open(timeline_file, "w", encoding="utf-8") as f:
+                    json.dump(tl_updated, f, indent=2)
+                storage.save_file(str(timeline_file), f"jobs/{job_id}/timeline.json")
+
+            mf_updated = None
+            manifest_file = work_dir / "manifest.json"
+            if manifest_file.exists():
+                with open(manifest_file, "r", encoding="utf-8") as f:
+                    mf_updated = json.load(f)
+                mf_updated["output_files"] = new_result_links
+                prov_list = mf_updated.get("provider_licences", [])
+                prov_list.append({
+                    "provider": new_cand.provider,
+                    "licence_name": new_cand.licence_name,
+                    "licence_url": new_cand.licence_url,
+                    "attribution": new_cand.attribution,
+                    "is_ai_generated": new_cand.is_ai_generated,
+                })
+                mf_updated["provider_licences"] = prov_list
+                with open(manifest_file, "w", encoding="utf-8") as f:
+                    json.dump(mf_updated, f, indent=2)
+                storage.save_file(str(manifest_file), f"jobs/{job_id}/manifest.json")
+
             job_rec = db.query(Job).filter(Job.id == job_id).first()
             if job_rec:
                 job_rec.result_links = new_result_links
+                if tl_updated:
+                    job_rec.timeline_data = tl_updated
+                if mf_updated:
+                    job_rec.manifest_data = mf_updated
             db.commit()
         finally:
             db.close()

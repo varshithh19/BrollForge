@@ -347,7 +347,9 @@ class VideoEnginePipeline:
 
                 # Persist SceneModel records in DB
                 for idx, sc in enumerate(scenes):
+                    scene_uuid = sc.get("scene_id") or str(uuid.uuid4())
                     sm = SceneModel(
+                        id=scene_uuid,
                         job_id=self.job_id,
                         scene_index=idx,
                         text=sc["text"],
