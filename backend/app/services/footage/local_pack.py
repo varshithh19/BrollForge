@@ -19,7 +19,7 @@ LOCAL_LICENSED_CATALOG = [
         "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
         "source_url": "https://brollforge.local/licensed_pack/business_partnership",
         "attribution": "Creative Commons Zero (CC0 1.0) Public Domain Dedication",
-        "pattern": "color=c=navy:s=1920x1080:d=10",
+        "pattern": "testsrc2=size=1920x1080:rate=30",
         "filter": "format=yuv420p",
     },
     {
@@ -32,7 +32,7 @@ LOCAL_LICENSED_CATALOG = [
         "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
         "source_url": "https://brollforge.local/licensed_pack/growth_analytics",
         "attribution": "Creative Commons Zero (CC0 1.0) Public Domain Dedication",
-        "pattern": "color=c=teal:s=1920x1080:d=10",
+        "pattern": "testsrc2=size=1920x1080:rate=30",
         "filter": "format=yuv420p",
     },
     {
@@ -45,7 +45,7 @@ LOCAL_LICENSED_CATALOG = [
         "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
         "source_url": "https://brollforge.local/licensed_pack/datacenter_servers",
         "attribution": "Creative Commons Zero (CC0 1.0) Public Domain Dedication",
-        "pattern": "color=c=0x111827:s=1920x1080:d=10",
+        "pattern": "testsrc2=size=1920x1080:rate=30",
         "filter": "format=yuv420p",
     },
     {
@@ -58,7 +58,7 @@ LOCAL_LICENSED_CATALOG = [
         "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
         "source_url": "https://brollforge.local/licensed_pack/software_engineering",
         "attribution": "Creative Commons Zero (CC0 1.0) Public Domain Dedication",
-        "pattern": "color=c=0x0f172a:s=1920x1080:d=10",
+        "pattern": "testsrc2=size=1920x1080:rate=30",
         "filter": "format=yuv420p",
     },
     {
@@ -71,7 +71,7 @@ LOCAL_LICENSED_CATALOG = [
         "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
         "source_url": "https://brollforge.local/licensed_pack/modern_banking",
         "attribution": "Creative Commons Zero (CC0 1.0) Public Domain Dedication",
-        "pattern": "color=c=0x1e3a8a:s=1920x1080:d=10",
+        "pattern": "testsrc2=size=1920x1080:rate=30",
         "filter": "format=yuv420p",
     },
     {
@@ -84,7 +84,7 @@ LOCAL_LICENSED_CATALOG = [
         "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
         "source_url": "https://brollforge.local/licensed_pack/serene_nature",
         "attribution": "Creative Commons Zero (CC0 1.0) Public Domain Dedication",
-        "pattern": "color=c=0x312e81:s=1920x1080:d=10",
+        "pattern": "testsrc2=size=1920x1080:rate=30",
         "filter": "format=yuv420p",
     },
     {
@@ -97,7 +97,7 @@ LOCAL_LICENSED_CATALOG = [
         "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
         "source_url": "https://brollforge.local/licensed_pack/general_business",
         "attribution": "Creative Commons Zero (CC0 1.0) Public Domain Dedication",
-        "pattern": "color=c=0x1e293b:s=1920x1080:d=10",
+        "pattern": "testsrc2=size=1920x1080:rate=30",
         "filter": "format=yuv420p",
     },
 ]

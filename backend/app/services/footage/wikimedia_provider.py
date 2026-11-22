@@ -29,11 +29,16 @@ class WikimediaCommonsProvider(FootageProvider):
         orientation: Optional[str] = None,
         limit: int = 5,
     ) -> List[FootageCandidate]:
+        # Extract key search keywords for MediaWiki search
+        clean_words = [w for w in query.replace(",", " ").split() if len(w) > 3 and w.lower() not in {"bright", "modern", "enterprise", "footage", "real-world"}][:2]
+        search_term = " ".join(clean_words) if clean_words else query.split()[0] if query.split() else "technology"
+
         params = {
             "action": "query",
             "format": "json",
             "generator": "search",
-            "gsrsearch": f"filetype:video {query}",
+            "gsrsearch": f"filetype:video {search_term}",
+            "gsrnamespace": 6,
             "gsrlimit": min(limit, 10),
             "prop": "imageinfo",
             "iiprop": "url|size|extmetadata",
@@ -59,7 +64,14 @@ class WikimediaCommonsProvider(FootageProvider):
 
             info = imageinfo[0]
             url = info.get("url")
-            if not url or not (url.endswith(".webm") or url.endswith(".mp4") or url.endswith(".ogv")):
+            base_url = url.split("?")[0].lower() if url else ""
+            if not base_url or not (base_url.endswith(".webm") or base_url.endswith(".mp4") or base_url.endswith(".ogv")):
+                continue
+
+            # Skip oversized files (e.g. multi-gigabyte raw footage) to ensure fast, reliable downloads
+            file_size = int(info.get("size", 0))
+            if file_size > 25 * 1024 * 1024 or file_size == 0:
+                logger.info(f"Skipping Wikimedia candidate {page_id} (size {file_size} bytes exceeds 25MB limit)")
                 continue
 
             metadata = info.get("extmetadata", {})
@@ -107,13 +119,37 @@ class WikimediaCommonsProvider(FootageProvider):
         return candidates
 
     async def download_clip(self, candidate: FootageCandidate, target_path: str) -> str:
+        import os
+        import subprocess
+        from backend.app.config.settings import settings
+
         Path(target_path).parent.mkdir(parents=True, exist_ok=True)
         headers = {"User-Agent": "BrollForgeVideoEngine/1.0 (incubrix-assessment; contact@brollforge.local)"}
         async with httpx.AsyncClient(timeout=45.0, follow_redirects=True) as client:
             resp = await client.get(candidate.download_url, headers=headers)
             resp.raise_for_status()
-            with open(target_path, "wb") as f:
-                f.write(resp.content)
 
-        logger.info(f"Downloaded Wikimedia clip {candidate.provider_asset_id} to {target_path}")
+        temp_file = target_path + ".tmp"
+        with open(temp_file, "wb") as f:
+            f.write(resp.content)
+
+        # Transcode cleanly to H.264 MP4 using FFmpeg (first 12s is plenty for b-roll scenes)
+        cmd = [
+            settings.FFMPEG_PATH,
+            "-y",
+            "-t", "12",
+            "-i", str(temp_file),
+            "-c:v", "libx264",
+            "-preset", "veryfast",
+            "-pix_fmt", "yuv420p",
+            "-an",
+            str(target_path),
+        ]
+        try:
+            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+
+        logger.info(f"Downloaded and normalized Wikimedia clip {candidate.provider_asset_id} to {target_path}")
         return target_path
