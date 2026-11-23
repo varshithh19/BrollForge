@@ -9,18 +9,13 @@ from backend.app.config.settings import settings
 from backend.app.core.errors import BrollForgeException, brollforge_exception_handler, generic_exception_handler
 from backend.app.core.logging import correlation_id_ctx, logger
 from backend.app.db.session import Base, engine
-from backend.app.services.footage.local_pack import LocalLicensedFootageProvider
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: ensure tables exist and local verified media pack is ready
+    # Startup: initialize database tables only.
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION} ({settings.APP_ENV})")
     Base.metadata.create_all(bind=engine)
-    try:
-        LocalLicensedFootageProvider()
-    except Exception as e:
-        logger.warning(f"Could not pre-initialize local pack: {e}")
     yield
     # Shutdown
     logger.info(f"Shutting down {settings.APP_NAME}")
