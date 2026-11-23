@@ -20,7 +20,7 @@ RUN pip install --upgrade pip && \
     pip install -r /app/backend/requirements.txt
 
 COPY backend /app/backend
-COPY storage /app/storage
+RUN mkdir -p /app/storage
 
 EXPOSE 8000
 
