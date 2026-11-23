@@ -33,6 +33,8 @@ class SceneRenderer:
             "-t", dur_str,
             "-vf", aspect_filter,
             "-c:v", settings.DEFAULT_VIDEO_CODEC,
+            "-threads", "2",
+            "-preset", "ultrafast",
             "-pix_fmt", settings.DEFAULT_PIXEL_FORMAT,
             "-r", str(settings.DEFAULT_FRAME_RATE),
             "-an",  # Strip footage source audio (narration will be mixed over in composer)
